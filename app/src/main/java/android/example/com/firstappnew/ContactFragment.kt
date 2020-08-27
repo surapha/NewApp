@@ -1,13 +1,18 @@
+import android.example.com.firstappnew.ContactViewModel
+import android.example.com.firstappnew.ContactViewModelFactory
 import android.example.com.firstappnew.R
+import android.example.com.firstappnew.database.Database
 import android.example.com.firstappnew.databinding.FragmentContactBinding
 import android.os.Bundle
 import android.view.*
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.findNavController
 import androidx.navigation.ui.NavigationUI
 
-class contactFragment : Fragment() {
+
+class ContactFragment : Fragment() {
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -20,19 +25,32 @@ class contactFragment : Fragment() {
             container,
             false
         )
+
         setHasOptionsMenu(true)
+
+        val application = requireNotNull(this.activity).application
+        val dataSource = Database.getInstance(application).databaseDao
+        val viewModelFactory = ContactViewModelFactory(dataSource, binding, application)
+        val contactViewModel =
+            ViewModelProvider(
+                this, viewModelFactory
+            ).get(ContactViewModel::class.java)
+        binding.contactViewModel = contactViewModel
+        binding.lifecycleOwner = this
         return binding.root
     }
 
+
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         super.onCreateOptionsMenu(menu, inflater)
-        inflater?.inflate(R.menu.options_menu, menu)
+        inflater.inflate(R.menu.menu, menu)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return NavigationUI.onNavDestinationSelected(
-            item!!,
+            item,
             view!!.findNavController()
         ) || super.onOptionsItemSelected(item)
     }
 }
+
